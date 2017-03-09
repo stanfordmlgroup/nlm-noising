@@ -24,11 +24,11 @@ The noising code can be found in `loader.py` and `utils.py`.
 
 First download PTB data from [here](https://github.com/wojzaremba/lstm/tree/master/data)
 and put in data directory. Make sure paths in `cfg.py` to point to data.
-Alternatively, You can also grab the Text8 data [here](http://mattmahoney.net/dc/text8.zip), then run
+Alternatively, you can also grab the Text8 data [here](http://mattmahoney.net/dc/text8.zip), then run
 the script `data/text8/makedata-text8.sh`.
 
 Then run `lm.py`. Here's an example setting:
 
 ```bash
-python lm.py --run_dir /tmp/lm_1500_kn  --hidden_dim 1500 --drop_prob 0.65 --delta 0.2 --scheme ngram --ngram_scheme kn --absolute_discounting
+python lm.py --run_dir /tmp/lm_1500_kn  --hidden_dim 1500 --drop_prob 0.65 --gamma 0.2 --scheme ngram --ngram_scheme kn --absolute_discounting
 ```
