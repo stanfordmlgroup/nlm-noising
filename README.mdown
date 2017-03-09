@@ -23,7 +23,7 @@ The noising code can be found in `loader.py` and `utils.py`.
 ### How to run
 
 First download PTB data from [here](https://github.com/wojzaremba/lstm/tree/master/data)
-and put in data directory. Make sure paths in `cfg.py` to point to data.
+and put in data directory. Make sure to update paths in `cfg.py` to point to data.
 Alternatively, you can also grab the Text8 data [here](http://mattmahoney.net/dc/text8.zip), then run
 the script `data/text8/makedata-text8.sh`.
 
