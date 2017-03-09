@@ -9,7 +9,7 @@ Dependencies
 Based off of Tensorflow inplementation [here](https://github.com/tensorflow/models/blob/master/tutorials/rnn/ptb/ptb_word_lm.py),
 which is in turn based off of PTB LSTM implementation [here](https://github.com/wojzaremba/lstm).
 
-Implementings noising for language modeling as described in this [paper](https://arxiv.org/abs/1703.02573).
+Implements noising for neural language modeling as described in this [paper](https://arxiv.org/abs/1703.02573).
 ```
 @inproceedings{noising2017,
   title={Data Noising as Smoothing in Neural Network Language Models},
