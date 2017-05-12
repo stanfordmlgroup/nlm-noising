@@ -1,7 +1,7 @@
 ## Data Noising as Smoothing in Neural Network Language Models
 
 Dependencies
-- [Tensorflow](https://github.com/tensorflow/tensorflow) (Tested with v0.12)
+- [Tensorflow](https://github.com/tensorflow/tensorflow) (Tested with v1.1)
 - [NLTK](http://www.nltk.org/)
 
 ### Overview

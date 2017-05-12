@@ -61,11 +61,14 @@ class LanguageModel(object):
     self._y = tf.placeholder(tf.int32, [batch_size, unroll])
     self._len = tf.placeholder(tf.int32, [None, ])
 
-    lstm_cell = tf.nn.rnn_cell.BasicLSTMCell(flags.hidden_dim, forget_bias=1.0, state_is_tuple=True)
-    if is_training and flags.drop_prob > 0:
-      lstm_cell = tf.nn.rnn_cell.DropoutWrapper(
-          lstm_cell, output_keep_prob=1.0-flags.drop_prob)
-    cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell] * flags.layers, state_is_tuple=True)
+    lstm_cells = list()
+    for k in xrange(flags.layers):
+      lstm_cell = tf.contrib.rnn.BasicLSTMCell(flags.hidden_dim, forget_bias=1.0, state_is_tuple=True, reuse=tf.get_variable_scope().reuse)
+      if is_training and flags.drop_prob > 0:
+        lstm_cell = tf.contrib.rnn.DropoutWrapper(
+            lstm_cell , output_keep_prob=1.0-flags.drop_prob)
+      lstm_cells.append(lstm_cell)
+    cell = tf.contrib.rnn.MultiRNNCell(lstm_cells, state_is_tuple=True)
     self._initial_state = cell.zero_state(batch_size, tf.float32)
 
     with tf.device("/cpu:0"):
@@ -84,7 +87,7 @@ class LanguageModel(object):
           if time_step > 0: tf.get_variable_scope().reuse_variables()
           (cell_output, state) = cell(inputs[:, time_step, :], state)
           outputs.append(cell_output)
-      outputs = tf.reshape(tf.concat(1, outputs), [-1, flags.hidden_dim])
+      outputs = tf.reshape(tf.concat(outputs, 1), [-1, flags.hidden_dim])
     else:
       with tf.variable_scope("RNN"):
           outputs, state = tf.nn.dynamic_rnn(cell, inputs, sequence_length=self._len,
@@ -94,7 +97,7 @@ class LanguageModel(object):
     softmax_w = tf.get_variable("softmax_w", [flags.hidden_dim, vocab_size])
     softmax_b = tf.get_variable("softmax_b", [vocab_size])
     logits = tf.matmul(outputs, softmax_w) + softmax_b
-    seq_loss = tf.nn.seq2seq.sequence_loss_by_example(
+    seq_loss = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
       [tf.reshape(logits, [-1, vocab_size])],
       [tf.reshape(self._y, [-1])],
       [tf.ones([batch_size * unroll])])
@@ -118,9 +121,9 @@ class LanguageModel(object):
 
     # Summaries for TensorBoard, note this is only within training portion
     with tf.name_scope("summaries"):
-      tf.scalar_summary("loss", self.loss / unroll)
-      tf.scalar_summary("learning_rate", self.lr)
-      tf.scalar_summary("grads_norm", grads_norm)
+      tf.summary.scalar("loss", self.loss / unroll)
+      tf.summary.scalar("learning_rate", self.lr)
+      tf.summary.scalar("grads_norm", grads_norm)
 
   def set_lr(self, session, lr_value):
     session.run(tf.assign(self.lr, lr_value))
@@ -189,10 +192,10 @@ def main(_):
       mvalid = LanguageModel(FLAGS, vocab_size, is_training=False)
       mtest = LanguageModel(eval_flags, vocab_size, is_training=False)
 
-    summary_op = tf.merge_all_summaries()
-    train_writer = tf.train.SummaryWriter(FLAGS.run_dir)
+    summary_op = tf.summary.merge_all()
+    train_writer = tf.summary.FileWriter(FLAGS.run_dir)
     model_saver = tf.train.Saver(max_to_keep=FLAGS.max_epochs)
-    tf.initialize_all_variables().run()
+    tf.global_variables_initializer().run()
 
     if FLAGS.restore_checkpoint is not None:
       saver.restore(session, FLAGS.restore_checkpoint)
